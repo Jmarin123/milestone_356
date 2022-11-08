@@ -3,6 +3,7 @@ const cors = require('cors');
 const Y = require('yjs');
 const app = express();
 const path = require('path');
+const cookieParser = require('cookie-parser');
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
