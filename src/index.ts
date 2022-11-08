@@ -1,5 +1,6 @@
 // ... add imports and fill in the code
 import * as Y from 'yjs';
+//import QuillDeltaToHtmlConverter from 'quill-delta-to-html'
 class CRDTFormat {
   public bold?: Boolean = false;
   public italic?: Boolean = false;
@@ -17,14 +18,16 @@ exports.CRDT = class {
     this.ydoc = new Y.Doc();
     this.ytext = this.ydoc.getText();
     this.ydoc.on('update', (update: Uint8Array) => {
-      const array = JSON.stringify(update);
+      const u8 = Array.from(update);
+      const array = JSON.stringify(u8);
       this.cb(array, true);
     })
   }
 
   update(update: string) {
     const parsed = JSON.parse(update);
-    Y.applyUpdate(this.ydoc, parsed);
+    const gettingU = Uint8Array.from(parsed);
+    Y.applyUpdate(this.ydoc, gettingU);
   }
   insert(index: number, content: string, format: CRDTFormat) {
     this.ytext.insert(index, content, format)

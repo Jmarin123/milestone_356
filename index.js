@@ -34,14 +34,16 @@ function helper(req, res, next) {
         if (documents.get(id) === undefined) {
             let ydoc = new Y.Doc();
             documents.set(id, ydoc);
+            console.log("made doc with id: " + id);
         }
         const fullState = Y.encodeStateAsUpdate(documents.get(id));
-        const ableToSend = JSON.stringify(fullState);
+        const makingArray = Array.from(fullState);
+        const ableToSend = JSON.stringify(makingArray);
         let newClient = {
             id: id,
             res
         };
-        if (currentPeople.indexOf(newClient) !== -1) {
+        if (currentPeople.indexOf(newClient) === -1) {
             currentPeople.push(newClient);
         }
         data = `event: sync\ndata: ${ableToSend}\n\n`
@@ -57,20 +59,22 @@ function helper(req, res, next) {
 
 app.get('/api/connect/:id', helper);
 
-async function postingHelper(req, res) {
-    let { id } = req.params
-    let grabTrueDoc = documents.get(id);
-    let gettingU = req.body
-    Y.applyUpdate(grabTrueDoc, gettingU);
-    //console.log(grabTrueDoc.getText().toDelta());
-    //console.log("working with id: " + id);
+function msgToAll(msg, id) {
     currentPeople.forEach(person => {
         if (person.id == id) {
-            //console.log("sent update to person");
-            person.res.write(`event: update\ndata: ${JSON.stringify(req.body)}\n\n`);
+            person.res.write(`event: update\ndata: ${JSON.stringify(msg)}\n\n`);
         }
     });
-    return res.status(200).send('updated post');;
+}
+
+
+async function postingHelper(req, res, next) {
+    let { id } = req.params
+    let grabTrueDoc = documents.get(id);
+    let gettingU = Uint8Array.from(req.body)
+    Y.applyUpdate(grabTrueDoc, gettingU);
+    res.status(200).send('updated post');
+    return msgToAll(req.body, id);
 
 };
 
