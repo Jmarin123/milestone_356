@@ -3,7 +3,6 @@ const cors = require('cors');
 const Y = require('yjs');
 const app = express();
 const path = require('path');
-const { fromUint8Array } = require('js-base64');
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -28,20 +27,18 @@ function helper(req, res, next) {
         res.writeHead(200, headers);
         let data;
         if (documents.get(id) === undefined) {
-            //documents.set(id, "");
             let ydoc = new Y.Doc();
             documents.set(id, ydoc);
-            console.log("made doc with id: " + id);
         }
         const fullState = Y.encodeStateAsUpdate(documents.get(id));
-        const makingArray = Array.from(fullState);
-        const ableToSend = JSON.stringify(makingArray);
+        const ableToSend = JSON.stringify(fullState);
         let newClient = {
             id: id,
             res
         };
-        currentPeople.push(newClient);
-        //console.log("syncing!: " + documents.get(id).getText().toDelta());
+        if (currentPeople.indexOf(newClient) !== -1) {
+            currentPeople.push(newClient);
+        }
         data = `event: sync\ndata: ${ableToSend}\n\n`
         res.write(data);
         res.on('close', () => {
@@ -55,29 +52,20 @@ function helper(req, res, next) {
 
 app.get('/api/connect/:id', helper);
 
-function msgToAll(msg, id) {
+async function postingHelper(req, res) {
+    let { id } = req.params
+    let grabTrueDoc = documents.get(id);
+    let gettingU = req.body
+    Y.applyUpdate(grabTrueDoc, gettingU);
+    //console.log(grabTrueDoc.getText().toDelta());
+    //console.log("working with id: " + id);
     currentPeople.forEach(person => {
         if (person.id == id) {
             //console.log("sent update to person");
-            person.res.write(`event: update\ndata: ${JSON.stringify(msg)}\n\n`);
+            person.res.write(`event: update\ndata: ${JSON.stringify(req.body)}\n\n`);
         }
     });
-}
-
-
-async function postingHelper(req, res, next) {
-    let { id } = req.params
-    let grabTrueDoc = documents.get(id);
-    let gettingU = Uint8Array.from(req.body)
-    Y.applyUpdate(grabTrueDoc, gettingU);
-    console.log(grabTrueDoc.getText().toDelta());
-    console.log("working with id: " + id);
-    // const update = Y.encodeStateAsUpdate(grabTrueDoc);
-    // const u8 = Array.from(update);
-    // const array = JSON.stringify(u8);
-    //documents.set(id, grabTrueDoc);
-    res.status(200).send('updated post');
-    return msgToAll(req.body, id);
+    return res.status(200).send('updated post');;
 
 };
 
