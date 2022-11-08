@@ -27,7 +27,6 @@ function helper(req, res, next) {
         res.writeHead(200, headers);
         let data;
         if (documents.get(id) === undefined) {
-            //documents.set(id, "");
             let ydoc = new Y.Doc();
             documents.set(id, ydoc);
         }
@@ -37,8 +36,9 @@ function helper(req, res, next) {
             id: id,
             res
         };
-        currentPeople.push(newClient);
-        //console.log("syncing!: " + documents.get(id).getText().toDelta());
+        if (currentPeople.indexOf(newClient) !== -1) {
+            currentPeople.push(newClient);
+        }
         data = `event: sync\ndata: ${ableToSend}\n\n`
         res.write(data);
         res.on('close', () => {
