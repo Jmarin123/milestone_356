@@ -78,7 +78,32 @@ async function postingHelper(req, res, next) {
 
 };
 
+async function getList() {
+    const response = await fetch('/collection/list');
+
+    if (!response.ok) {
+        const message = `An error has occured: ${response.status}`;
+        throw new Error(message);
+    }
+
+    let listOfDocuments = response.data.documents; //retrieving map of documents
+    let top10Docs = new Map(); //creating new map for the top 10 recently edited
+    index = 0; //index used to keep track of Map with size 10
+
+    for (let [key, value] of listOfDocuments.entries()) {
+        //REQUIRMENT: a variable to determine document that was most recently edited
+        //like a timestamp of some sorts added to the value when applying updates
+        if (index < 10) {
+            top10Docs.set(key, value)
+            index++;
+        }
+    }
+    return top10Docs;
+}
+
 app.post('/api/op/:id', postingHelper);
 app.use('/library/crdt.js', express.static(path.join(__dirname, '/dist/crdt.js')));
 app.listen(80);
 console.log("listening on port 80");
+
+export { documents }; //likely to be removed for homepage implementation
