@@ -42,8 +42,7 @@ getDocumentList = async (req, res) => {
 }
 
 module.exports = {
-    verifyUser,
-    registerUser,
-    loginUser,
-    logoutUser
+    createDocument,
+    deleteDocument,
+    getDocumentList
 }
