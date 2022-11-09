@@ -79,7 +79,7 @@ async function postingHelper(req, res, next) {
 };
 
 async function getList() {
-    const response = await fetch('/collection/list');
+    const response = await fetch('/list');
 
     if (!response.ok) {
         const message = `An error has occured: ${response.status}`;
@@ -101,6 +101,7 @@ async function getList() {
     return top10Docs;
 }
 
+app.get('/collection', getList);
 app.post('/api/op/:id', postingHelper);
 app.use('/library/crdt.js', express.static(path.join(__dirname, '/dist/crdt.js')));
 app.listen(80);

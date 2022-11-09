@@ -1,7 +1,9 @@
 import { documents } from 'index.js'
 
 function HomeScreen() { //SMALL MOCK UP of creating a home-screen with top 10 recently edited documents
+    
 
+    
     return (
 
         <div
