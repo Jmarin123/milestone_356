@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const ObjectId = Schema.Types.ObjectId
 //userSchema format for user database:
-const UserSchema = new Schema(
+const userSchema = new Schema(
     {
         username: { type: String, required: true },
         email: { type: String, required: true },
