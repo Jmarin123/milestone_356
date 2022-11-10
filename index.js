@@ -79,7 +79,7 @@ async function postingHelper(req, res, next) {
 };
 
 async function getList() {
-    const response = await fetch('/list');
+    const response = await fetch('/collections/list');
 
     if (!response.ok) {
         const message = `An error has occured: ${response.status}`;
@@ -93,6 +93,8 @@ async function getList() {
     for (let [key, value] of listOfDocuments.entries()) {
         //REQUIRMENT: a variable to determine document that was most recently edited
         //like a timestamp of some sorts added to the value when applying updates
+        //currentObjlastEdited
+        //currentObj.name
         if (index < 10) {
             top10Docs.set(key, value)
             index++;
@@ -101,7 +103,7 @@ async function getList() {
     return top10Docs;
 }
 
-app.get('/collection', getList);
+
 app.post('/api/op/:id', postingHelper);
 app.use('/library/crdt.js', express.static(path.join(__dirname, '/dist/crdt.js')));
 app.listen(80);
