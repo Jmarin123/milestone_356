@@ -4,10 +4,21 @@ const Y = require('yjs');
 const app = express();
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const multer = require('multer')
+const upload = multer({ dest: 'uploads/' });
+const storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+        callback(null, '/src/my-images');
+    },
+    filename: function (req, file, callback) {
+        callback(null, file.fieldname);
+    }
+});
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
 let currentPeople = [];
 let documents = new Map();
 let counter = 0;
@@ -16,7 +27,7 @@ app.use((req, res, next) => {
     next();
 })
 
-const userRouter = require('./server/routes/user-router') //requiring and using routes from server folder
+const userRouter = require('./server/routes/user-routes') //requiring and using routes from server folder
 app.use(userRouter)
 
 app.use('/test', express.static(path.join(__dirname, '/dist')));
@@ -128,17 +139,25 @@ app.post('/collection/delete', (req, res) => {
 
 app.post('/collection/list', (req, res) => {
     let allCollections = [];
-    for (let [key, value] of documents) {
-        if (allCollections.length === 10) {
-            break;
+    let ordered = [...documents.entries()].sort((a, b) => b[1].time - a[1].time);
+    let totalSize = 10;
+    if (ordered.length < totalSize) totalSize = ordered.length;
+    for (let i = 0; i < totalSize; i++) {
+        const addObj = {
+            id: ordered[i][0],
+            name: ordered[i][1].name
         }
-
+        allCollections.push(addObj);
     }
+    allCollections = JSON.stringify(allCollections);
     return res.send(allCollections);
 })
 
+app.post('/media/upload', upload.single('file'), (req, res) => {
+    console.log(req.file);
+})
 
 app.listen(80);
 console.log("listening on port 80");
 
-export { documents }; //likely to be removed for homepage implementation
+//export { documents }; //likely to be removed for homepage implementation
