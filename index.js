@@ -10,7 +10,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 let currentPeople = [];
 let documents = new Map();
-
+let counter = 0;
 app.use((req, res, next) => {
     res.setHeader('X-CSE356', '6306e95158d8bb3ef7f6c4c7'); //Setting our header no matter request
     next();
@@ -31,11 +31,6 @@ function helper(req, res, next) {
         let { id } = req.params;
         res.writeHead(200, headers);
         let data;
-        if (documents.get(id) === undefined) {
-            let ydoc = new Y.Doc();
-            documents.set(id, ydoc);
-            console.log("made doc with id: " + id);
-        }
         const fullState = Y.encodeStateAsUpdate(documents.get(id));
         const makingArray = Array.from(fullState);
         const ableToSend = JSON.stringify(makingArray);
@@ -56,6 +51,11 @@ function helper(req, res, next) {
         console.log("WTFFFF");
     }
 };
+// if (documents.get(id) === undefined) {
+//     let ydoc = new Y.Doc();
+//     documents.set(id, ydoc);
+//     console.log("made doc with id: " + id);
+// }
 
 app.get('/api/connect/:id', helper);
 
@@ -80,5 +80,37 @@ async function postingHelper(req, res, next) {
 
 app.post('/api/op/:id', postingHelper);
 app.use('/library/crdt.js', express.static(path.join(__dirname, '/dist/crdt.js')));
+
+app.post('/collection/create', (req, res) => {
+    const { name } = req.body;
+    let ydoc = new Y.Doc();
+    let currentTime = Date.now();
+    let currentObj = {
+        name: name,
+        document: ydoc,
+        lastEdited: currentTime
+    }
+    documents.set(counter, currentObj);
+    return res.send(counter++);
+});
+
+app.post('/collection/delete', (req, res) => {
+    const { id } = req.body;
+    documents.delete(id);
+})
+
+
+app.post('/collection/list', (req, res) => {
+    let allCollections = [];
+    for (let [key, value] of documents) {
+        if (allCollections.length === 10) {
+            break;
+        }
+
+    }
+    return res.send(allCollections);
+})
+
+
 app.listen(80);
 console.log("listening on port 80");

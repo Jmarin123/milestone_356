@@ -9,7 +9,7 @@ registerUser = async (req, res) => {
         const alreadyCreated = await User.findOne({ 'username': req.body.username });
         if (alreadyCreated) {
             //Throw error if user is created
-            res.json({ error: true, message: 'Please enter a password of at least 8 characters.' });
+            return res.json({ error: true, message: 'User Already Exists' });
         } else {
             const givenUUID = uuidv4();
             const encodedEmail = encodeURIComponent(req.body.email)
@@ -29,7 +29,7 @@ registerUser = async (req, res) => {
                 path: '/usr/sbin/sendmail'
             });
             insideText = 'http://goofy-goobers.cse356.compas.cs.stonybrook.edu/users/verify' + "?email=" + encodedEmail + "&key=" + givenUUID;
-            console.log(insideText);
+            //console.log(insideText);
             transport.sendMail({
                 from: 'root@goofy-goobers.cse356.compas.cs.stonybrook.edu',
                 to: req.body.email,
@@ -52,7 +52,7 @@ loginUser = async (req, res) => {
         }
 
         const existingUser = await User.findOne({ email: email });
-        console.log("existingUser: " + existingUser);
+        //console.log("existingUser: " + existingUser);
         if (!existingUser) {
             return res.json({ error: true, message: "Wrong email or password provided." })
         }
