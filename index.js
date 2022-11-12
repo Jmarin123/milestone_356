@@ -155,7 +155,7 @@ app.get('/collection/list', (req, res) => {
         allCollections = JSON.stringify(allCollections);
         return res.send(allCollections);
     }
-    return res.send('');
+    return res.json({ error: false, message: "Unauthorized status code" });
 
 })
 
