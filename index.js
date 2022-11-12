@@ -6,6 +6,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const multer = require('multer')
 const upload = multer({ dest: 'uploads/' });
+const mongoose = require('mongoose');
 const storage = multer.diskStorage({
     destination: function (req, file, callback) {
         callback(null, '/src/my-images');
@@ -22,6 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 let currentPeople = [];
 let documents = new Map();
 let counter = 0;
+mongoose.connect('mongodb://localhost:27017/myapp');
 app.use((req, res, next) => {
     res.setHeader('X-CSE356', '6306e95158d8bb3ef7f6c4c7'); //Setting our header no matter request
     next();
@@ -137,20 +139,24 @@ app.post('/collection/delete', (req, res) => {
 })
 
 
-app.post('/collection/list', (req, res) => {
-    let allCollections = [];
-    let ordered = [...documents.entries()].sort((a, b) => b[1].time - a[1].time);
-    let totalSize = 10;
-    if (ordered.length < totalSize) totalSize = ordered.length;
-    for (let i = 0; i < totalSize; i++) {
-        const addObj = {
-            id: ordered[i][0],
-            name: ordered[i][1].name
+app.get('/collection/list', (req, res) => {
+    if (req.cookies && req.cookies.username && req.cookies.password) {
+        let allCollections = [];
+        let ordered = [...documents.entries()].sort((a, b) => b[1].time - a[1].time);
+        let totalSize = 10;
+        if (ordered.length < totalSize) totalSize = ordered.length;
+        for (let i = 0; i < totalSize; i++) {
+            const addObj = {
+                id: ordered[i][0],
+                name: ordered[i][1].name
+            }
+            allCollections.push(addObj);
         }
-        allCollections.push(addObj);
+        allCollections = JSON.stringify(allCollections);
+        return res.send(allCollections);
     }
-    allCollections = JSON.stringify(allCollections);
-    return res.send(allCollections);
+    return res.send('');
+
 })
 
 app.post('/media/upload', upload.single('file'), (req, res) => {
