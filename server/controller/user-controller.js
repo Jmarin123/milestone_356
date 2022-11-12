@@ -3,10 +3,10 @@ const { v4: uuidv4 } = require('uuid');
 const nodemailer = require('nodemailer');
 
 registerUser = async (req, res) => {
-    if (!req.body.username || !req.body.password || !req.body.email) {
-        res.json({ error: true, message: 'Please enter all required fields.' }) //Bad request if it doesnt have username, password or email
+    if (!req.body.name || !req.body.password || !req.body.email) {
+        res.json({ error: true, message: 'Please enter all required fields.' }) //Bad request if it doesnt have name, password or email
     } else {
-        const alreadyCreated = await User.findOne({ 'username': req.body.username });
+        const alreadyCreated = await User.findOne({ 'name': req.body.name });
         if (alreadyCreated) {
             //Throw error if user is created
             return res.json({ error: true, message: 'User Already Exists' });
@@ -14,7 +14,7 @@ registerUser = async (req, res) => {
             const givenUUID = uuidv4();
             const encodedEmail = encodeURIComponent(req.body.email)
             const newUser = new User({ //This will create the user we need
-                username: req.body.username,
+                name: req.body.name,
                 password: req.body.password,
                 email: req.body.email,
                 isVerified: false,
@@ -45,8 +45,7 @@ registerUser = async (req, res) => {
 
 loginUser = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
-
+        const { name, email, password } = req.body;
         if (!email || !password) {
             return res.json({ error: true, message: "Please enter all required fields." });
         }
@@ -57,14 +56,14 @@ loginUser = async (req, res) => {
             return res.json({ error: true, message: "Wrong email or password provided." })
         }
 
-        //^Checked for empty values(email/username/password) checked if values were incorrect, checked if user exist in db, if all cases passed now we login and create cookie session
+        //^Checked for empty values(email/name/password) checked if values were incorrect, checked if user exist in db, if all cases passed now we login and create cookie session
         const options = {
             maxAge: 1000 * 60 * 15, //15 min timeout
         }
         if (getUser.isVerified == false) {
             return res.json({ error: true, message: "User needs to verify account first." });
         }
-        res.cookie('username', username, options);
+        res.cookie('name', name, options);
         res.cookie('password', password, options);
         res.json({ error: false, status: 'OK' });
 
@@ -76,8 +75,8 @@ loginUser = async (req, res) => {
 
 logoutUser = async (req, res) => {
     if (req.cookies) {
-        if (req.cookies.username && req.cookies.password) { //Checking if there exists cookies for username and password
-            res.clearCookie('username'); //Clearng our cookies
+        if (req.cookies.name && req.cookies.password) { //Checking if there exists cookies for name and password
+            res.clearCookie('name'); //Clearng our cookies
             res.clearCookie('password');
             res.json({ error: false, status: 'OK' })
         } else {
