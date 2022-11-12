@@ -28,7 +28,7 @@ registerUser = async (req, res) => {
                 newline: 'unix',
                 path: '/usr/sbin/sendmail'
             });
-            insideText = 'http://goofy-goobers.cse356.compas.cs.stonybrook.edu/users/verify' + "?email=" + encodedEmail + "&key=" + givenUUID;
+            insideText = 'http://209.151.150.54/users/verify' + "?email=" + encodedEmail + "&key=" + givenUUID;
             //console.log(insideText);
             transport.sendMail({
                 from: 'root@goofy-goobers.cse356.compas.cs.stonybrook.edu',
@@ -37,6 +37,7 @@ registerUser = async (req, res) => {
                 text: insideText
             }, (err, info) => {
                 console.log(err);
+                console.log(info);
             });
             res.json({ error: false, status: 'OK' });
         }
