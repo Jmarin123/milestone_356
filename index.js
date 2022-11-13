@@ -159,6 +159,11 @@ app.get('/collection/list', (req, res) => {
 
 })
 
+app.get("/home", (req, res) => {
+    res.render('./FrontEnd/Index.html');
+})
+
+
 app.post('/media/upload', upload.single('file'), (req, res) => {
     console.log(req.file);
 })
