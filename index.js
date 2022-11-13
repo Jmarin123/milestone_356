@@ -27,6 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 let currentPeople = [];
 let documents = new Map();
 let counter = 1;
+let currentCursors = [];
 mongoose.connect('mongodb://localhost:27017/myapp');
 app.use((req, res, next) => {
     res.setHeader('X-CSE356', '6306e95158d8bb3ef7f6c4c7'); //Setting our header no matter request
@@ -191,6 +192,24 @@ app.get('/media/access/:mediaid', (req, res) => {
         return res.sendFile(`${mediaid}`, options);
     }
     return res.json({ error: true, message: "Unauthorized status code" });
+})
+
+app.post('/api/presence/:id', (req, res) => {
+    const { index, length } = req.body;
+    let fullCursorData = {
+        session_id: Date.now(),
+        name: req.cookies.name,
+        cursor: {
+            index: index,
+            length: length
+        }
+    }
+    fullCursorData = JSON.stringify(fullCursorData);
+    currentPeople.forEach(person => {
+        person.res.write(`event: presence\ndata: ${fullCursorData}\n\n`);
+    });
+    currentCursors.push(fullCursorData);
+    return res.json(fullCursorData);
 })
 
 app.listen(80);
