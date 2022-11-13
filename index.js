@@ -39,34 +39,38 @@ app.use(userRouter)
 app.use('/test', express.static(path.join(__dirname, '/dist')));
 
 function helper(req, res, next) {
-    try {
-        let headers = {
-            'Content-Type': 'text/event-stream',
-            'Connection': 'keep-alive',
-            'Cache-Control': 'no-cache'
-        };
-        let { id } = req.params;
-        res.writeHead(200, headers);
-        let data;
-        id = parseInt(id);
-        const fullState = Y.encodeStateAsUpdate(documents.get(id).document);
-        const makingArray = Array.from(fullState);
-        const ableToSend = JSON.stringify(makingArray);
-        let newClient = {
-            id: id,
-            res
-        };
-        if (currentPeople.indexOf(newClient) === -1) {
-            currentPeople.push(newClient);
+    if (eq.cookies && req.cookies.name && req.cookies.password) {
+        try {
+            let headers = {
+                'Content-Type': 'text/event-stream',
+                'Connection': 'keep-alive',
+                'Cache-Control': 'no-cache'
+            };
+            let { id } = req.params;
+            res.writeHead(200, headers);
+            let data;
+            id = parseInt(id);
+            const fullState = Y.encodeStateAsUpdate(documents.get(id).document);
+            const makingArray = Array.from(fullState);
+            const ableToSend = JSON.stringify(makingArray);
+            let newClient = {
+                id: id,
+                res
+            };
+            if (currentPeople.indexOf(newClient) === -1) {
+                currentPeople.push(newClient);
+            }
+            data = `event: sync\ndata: ${ableToSend}\n\n`
+            res.write(data);
+            res.on('close', () => {
+                console.log(`Connection closed`);
+                //currentPeople = currentPeople.filter(client => client.id !== id);
+            });
+        } catch (e) {
+            console.log("WTFFFF");
         }
-        data = `event: sync\ndata: ${ableToSend}\n\n`
-        res.write(data);
-        res.on('close', () => {
-            console.log(`Connection closed`);
-            //currentPeople = currentPeople.filter(client => client.id !== id);
-        });
-    } catch (e) {
-        console.log("WTFFFF");
+    } else {
+        return res.json({ error: true, message: "Login before connecting" });
     }
 };
 // if (documents.get(id) === undefined) {
@@ -88,6 +92,7 @@ function msgToAll(msg, id) {
 
 async function postingHelper(req, res, next) {
     let { id } = req.params
+    id = parseInt(id);
     let grabTrueDoc = documents.get(id).document;
     let gettingU = Uint8Array.from(req.body)
     Y.applyUpdate(grabTrueDoc, gettingU);
