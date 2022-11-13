@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const multer = require('multer')
 const upload = multer({ dest: 'uploads/' });
 const mongoose = require('mongoose');
+const ejsEngine = require('ejs-mate');
 const storage = multer.diskStorage({
     destination: function (req, file, callback) {
         callback(null, '/src/my-images');
@@ -18,6 +19,8 @@ const storage = multer.diskStorage({
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.set('view engine', 'ejs');
+app.engine('ejs', ejsEngine);
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 let currentPeople = [];
