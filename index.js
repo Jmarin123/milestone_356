@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
         callback(null, '/src/my-images');
     },
     filename: function (req, file, callback) {
-        callback(null, file.fieldname);
+        callback(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
 });
 app.use(cors());
@@ -171,9 +171,24 @@ app.get("/home", (req, res) => {
 })
 
 
-app.post('/media/upload', upload.single('file'), (req, res) => {
+app.post('/media/upload', (req, res) => {
+    let upload = multer({
+        storage: storage,
+        fileFilter: function (req, file, callback) {
+            var ext = path.extname(file.originalname);
+            if (ext !== '.jepg' && ext !== '.png') {
+                return callback(new Error('Only images are allowed'))
+            }
+            callback(null, true)
+        }
+    }).single('file');
     if (req.cookies && req.cookies.name) {
-        return res.json({ mediaid: req.file.filename });
+        upload(req, res, function (err) {
+            if (err) {
+                return res.json({ error: true, message: "Not allowed" });
+            }
+            return res.json({ mediaid: req.file.filename });
+        });
     }
     return res.json({ error: true, message: "Unauthorized status code" });
 })
