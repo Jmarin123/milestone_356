@@ -5,29 +5,17 @@ const app = express();
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const multer = require('multer')
-const uploadPos = multer({ dest: 'uploads/' });
 const mongoose = require('mongoose');
 const ejsEngine = require('ejs-mate');
 const storage = multer.diskStorage({
     destination: function (req, file, callback) {
-        callback(null, '/uploads/my-images');
+        callback(null, 'uploads/');
     },
     filename: function (req, file, callback) {
-        let varTime = Date.now();
-        callback(null, file.fieldname + '-' + varTime + path.extname(file.originalname));
+        callback(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
 });
-let upload = multer({
-    storage: storage,
-    fileFilter: function (req, file, callback) {
-        var ext = path.extname(file.originalname);
-        if (ext !== '.jepg' && ext !== '.png') {
-            return callback(new Error('Only images are allowed'))
-        }
-        callback(null, true)
-    }
-}).single('file');
-
+const upload = multer({ storage: storage });
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -183,16 +171,9 @@ app.get("/home", (req, res) => {
 })
 
 
-app.post('/media/upload', (req, res) => {
+app.post('/media/upload', upload.single('file'), (req, res) => {
     if (req.cookies && req.cookies.name) {
-        upload(req, res, function (err) {
-            if (err) {
-                return res.json({ error: true, message: "Bad upload" });
-            }
-            else {
-                console.log("Image was uploaded");
-            }
-        });
+        return res.json({ mediaid: req.file.filename });
     }
     return res.json({ error: true, message: "Unauthorized status code" });
 })
@@ -200,8 +181,7 @@ app.post('/media/upload', (req, res) => {
 app.get('/media/access/:mediaid', (req, res) => {
     if (req.cookies && req.cookies.name) {
         var options = {
-            root: path.join(__dirname, 'uploads'),
-            //headers: { 'Content-type': 'image/jpg' }
+            root: path.join(__dirname, 'uploads')
         };
         let { mediaid } = req.params;
         return res.sendFile(`${mediaid}`, options);
