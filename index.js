@@ -20,6 +20,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 app.engine('ejs', ejsEngine);
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -163,7 +164,7 @@ app.get('/collection/list', (req, res) => {
 })
 
 app.get("/home", (req, res) => {
-    res.render('./FrontEnd/index');
+    res.render('index');
 })
 
 
