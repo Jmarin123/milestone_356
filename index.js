@@ -159,6 +159,7 @@ app.get('/collection/list', (req, res) => {
         allCollections = JSON.stringify(allCollections);
         return res.send(allCollections);
     }
+    console.log(req.cookies);
     return res.json({ error: true, message: "Unauthorized status code" });
 
 })
