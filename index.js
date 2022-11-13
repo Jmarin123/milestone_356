@@ -152,6 +152,7 @@ app.get('/collection/list', (req, res) => {
         let allCollections = [];
         let ordered = [...documents.entries()].sort((a, b) => b[1].time - a[1].time);
         let totalSize = 10;
+        console.log(ordered);
         if (ordered.length < totalSize) totalSize = ordered.length;
         for (let i = 0; i < totalSize; i++) {
             const addObj = {
