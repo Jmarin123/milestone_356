@@ -48,7 +48,7 @@ function helper(req, res, next) {
         let { id } = req.params;
         res.writeHead(200, headers);
         let data;
-        const fullState = Y.encodeStateAsUpdate(documents.get(id));
+        const fullState = Y.encodeStateAsUpdate(documents.get(id).document);
         const makingArray = Array.from(fullState);
         const ableToSend = JSON.stringify(makingArray);
         let newClient = {
@@ -87,7 +87,7 @@ function msgToAll(msg, id) {
 
 async function postingHelper(req, res, next) {
     let { id } = req.params
-    let grabTrueDoc = documents.get(id);
+    let grabTrueDoc = documents.get(id).document;
     let gettingU = Uint8Array.from(req.body)
     Y.applyUpdate(grabTrueDoc, gettingU);
     res.status(200).send('updated post');
