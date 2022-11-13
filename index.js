@@ -93,48 +93,56 @@ function msgToAll(msg, id) {
 
 
 async function postingHelper(req, res, next) {
-    let { id } = req.params
-    id = parseInt(id);
-    let grabTrueDoc = documents.get(id).document;
-    let gettingU = Uint8Array.from(req.body)
-    Y.applyUpdate(grabTrueDoc, gettingU);
-    let newTime = Date.now();
-    let currentObj = {
-        name: documents.get(id).name,
-        document: grabTrueDoc,
-        lastEdited: newTime
+    if (req.cookies && req.cookies.name) {
+        let { id } = req.params
+        id = parseInt(id);
+        let grabTrueDoc = documents.get(id).document;
+        let gettingU = Uint8Array.from(req.body)
+        Y.applyUpdate(grabTrueDoc, gettingU);
+        let newTime = Date.now();
+        let currentObj = {
+            name: documents.get(id).name,
+            document: grabTrueDoc,
+            lastEdited: newTime
+        }
+        documents.set(id, currentObj);
+        res.status(200).send('updated post');
+        return msgToAll(req.body, id);
     }
-    documents.set(id, currentObj);
-    res.status(200).send('updated post');
-    return msgToAll(req.body, id);
-
+    return res.json({ error: true, message: "Unauthorized status code" });
 };
 
 app.post('/api/op/:id', postingHelper);
 app.use('/library/crdt.js', express.static(path.join(__dirname, '/dist/crdt.js')));
 
 app.post('/collection/create', (req, res) => {
-    const { name } = req.body;
-    let ydoc = new Y.Doc();
-    let currentTime = Date.now();
-    let currentObj = {
-        name: name,
-        document: ydoc,
-        lastEdited: currentTime
+    if (req.cookies && req.cookies.name) {
+        const { name } = req.body;
+        let ydoc = new Y.Doc();
+        let currentTime = Date.now();
+        let currentObj = {
+            name: name,
+            document: ydoc,
+            lastEdited: currentTime
+        }
+        documents.set(counter, currentObj);
+        let returnJson = {
+            id: counter
+        }
+        counter++;
+        return res.send(returnJson);
     }
-    documents.set(counter, currentObj);
-    let returnJson = {
-        id: counter
-    }
-    counter++;
-    return res.send(returnJson);
+    return res.json({ error: true, message: "Unauthorized status code" });
 });
 
 app.post('/collection/delete', (req, res) => {
-    const { id } = req.body;
-    console.log(id);
-    documents.delete(id);
-    return res.sendStatus(200);
+    if (req.cookies && req.cookies.name) {
+        const { id } = req.body;
+        console.log(id);
+        documents.delete(id);
+        return res.sendStatus(200);
+    }
+    return res.json({ error: true, message: "Unauthorized status code" });
 })
 
 
@@ -154,7 +162,6 @@ app.get('/collection/list', (req, res) => {
         allCollections = JSON.stringify(allCollections);
         return res.send(allCollections);
     }
-    console.log(req.cookies);
     return res.json({ error: true, message: "Unauthorized status code" });
 
 })
@@ -165,15 +172,21 @@ app.get("/home", (req, res) => {
 
 
 app.post('/media/upload', upload.single('file'), (req, res) => {
-    return res.json({ mediaid: req.file.filename });
+    if (req.cookies && req.cookies.name) {
+        return res.json({ mediaid: req.file.filename });
+    }
+    return res.json({ error: true, message: "Unauthorized status code" });
 })
 
 app.get('/media/access/:mediaid', (req, res) => {
-    var options = {
-        root: path.join(__dirname, 'uploads')
-    };
-    let { mediaid } = req.params;
-    return res.sendFile(`${mediaid}`, options);
+    if (req.cookies && req.cookies.name) {
+        var options = {
+            root: path.join(__dirname, 'uploads')
+        };
+        let { mediaid } = req.params;
+        return res.sendFile(`${mediaid}`, options);
+    }
+    return res.json({ error: true, message: "Unauthorized status code" });
 })
 
 app.listen(80);
