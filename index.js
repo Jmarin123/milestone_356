@@ -181,7 +181,8 @@ app.post('/media/upload', upload.single('file'), (req, res) => {
 app.get('/media/access/:mediaid', (req, res) => {
     if (req.cookies && req.cookies.name) {
         var options = {
-            root: path.join(__dirname, 'uploads')
+            root: path.join(__dirname, 'uploads'),
+            headers: { 'Content-type': 'image/jpg' }
         };
         let { mediaid } = req.params;
         return res.sendFile(`${mediaid}`, options);
