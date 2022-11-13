@@ -160,7 +160,7 @@ app.get('/collection/list', (req, res) => {
 })
 
 app.get("/home", (req, res) => {
-    res.render('./FrontEnd/Index.html');
+    res.render('./FrontEnd/index');
 })
 
 
