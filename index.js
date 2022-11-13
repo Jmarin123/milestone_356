@@ -145,7 +145,7 @@ app.post('/collection/delete', (req, res) => {
     const { id } = req.body;
     console.log(id);
     documents.delete(id);
-    return res.json({ status: "OK" }).sendStatus(200);
+    return res.sendStatus(200);
 })
 
 
@@ -171,7 +171,7 @@ app.get('/collection/list', (req, res) => {
 })
 
 app.get("/home", (req, res) => {
-    res.render('index');
+    return res.render('index');
 })
 
 

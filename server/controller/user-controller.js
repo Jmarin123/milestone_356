@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 
 registerUser = async (req, res) => {
     if (!req.body.name || !req.body.password || !req.body.email) {
-        res.json({ error: true, message: 'Please enter all required fields.' }) //Bad request if it doesnt have name, password or email
+        return res.json({ error: true, message: 'Please enter all required fields.' }) //Bad request if it doesnt have name, password or email
     } else {
         const alreadyCreated = await User.findOne({ 'name': req.body.name });
         if (alreadyCreated) {
@@ -39,7 +39,7 @@ registerUser = async (req, res) => {
                 console.log(err);
                 console.log(info);
             });
-            res.json({ error: false, status: 'OK' });
+            return res.json({ error: false, status: 'OK' });
         }
     }
 }
@@ -70,7 +70,7 @@ loginUser = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.status(500).send();
+        return res.status(500);
     }
 }
 
@@ -79,12 +79,12 @@ logoutUser = async (req, res) => {
         if (req.cookies.name && req.cookies.password) { //Checking if there exists cookies for name and password
             res.clearCookie('name'); //Clearng our cookies
             res.clearCookie('password');
-            res.json({ error: false, status: 'OK' })
+            return res.json({ error: false, status: 'OK' })
         } else {
-            res.json({ error: true, message: "Logout unsuccessful, cookies do not exist." });
+            return res.json({ error: true, message: "Logout unsuccessful, cookies do not exist." });
         }
     } else {
-        res.json({ error: false, message: "Unauthorized status code" });;
+        return res.json({ error: false, message: "Unauthorized status code" });;
     }
 }
 
@@ -109,7 +109,7 @@ verifyUser = async (req, res) => {
             return res.json({ error: true, message: 'didnt find a user in the DB' });//If key doesnt match send a 400
         }
     } else {
-        res.json({ error: true, message: 'Failed to get key and email!' });
+        return res.json({ error: true, message: 'Failed to get key and email!' });
     }
 }
 
