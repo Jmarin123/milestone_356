@@ -26,7 +26,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 let currentPeople = [];
 let documents = new Map();
-let counter = 0;
+let counter = 1;
 mongoose.connect('mongodb://localhost:27017/myapp');
 app.use((req, res, next) => {
     res.setHeader('X-CSE356', '6306e95158d8bb3ef7f6c4c7'); //Setting our header no matter request
@@ -138,7 +138,7 @@ app.post('/collection/create', (req, res) => {
         id: counter
     }
     counter++;
-    return res.json(returnJson);
+    return res.send(returnJson);
 });
 
 app.post('/collection/delete', (req, res) => {
