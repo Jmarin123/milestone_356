@@ -143,7 +143,9 @@ app.post('/collection/create', (req, res) => {
 
 app.post('/collection/delete', (req, res) => {
     const { id } = req.body;
+    console.log(id);
     documents.delete(id);
+    return res.json({ status: "OK" }).sendStatus(200);
 })
 
 
@@ -152,7 +154,6 @@ app.get('/collection/list', (req, res) => {
         let allCollections = [];
         let ordered = [...documents.entries()].sort((a, b) => b[1].lastEdited - a[1].lastEdited);
         let totalSize = 10;
-        console.log(ordered);
         if (ordered.length < totalSize) totalSize = ordered.length;
         for (let i = 0; i < totalSize; i++) {
             const addObj = {
