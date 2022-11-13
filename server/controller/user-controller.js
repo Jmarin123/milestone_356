@@ -28,7 +28,7 @@ registerUser = async (req, res) => {
                 newline: 'unix',
                 path: '/usr/sbin/sendmail'
             });
-            insideText = 'http://209.151.150.54/users/verify' + "?email=" + encodedEmail + "&key=" + givenUUID;
+            insideText = 'http://goofy-goobers.cse356.compas.cs.stonybrook.edu/users/verify' + "?email=" + encodedEmail + "&key=" + givenUUID;
             //console.log(insideText);
             transport.sendMail({
                 from: 'root@goofy-goobers.cse356.compas.cs.stonybrook.edu',
@@ -61,7 +61,7 @@ loginUser = async (req, res) => {
         const options = {
             maxAge: 1000 * 60 * 15, //15 min timeout
         }
-        if (getUser.isVerified == false) {
+        if (existingUser.isVerified == false) {
             return res.json({ error: true, message: "User needs to verify account first." });
         }
         res.cookie('name', name, options);
