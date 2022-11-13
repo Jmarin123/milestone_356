@@ -174,8 +174,8 @@ app.get("/home", (req, res) => {
 app.post('/media/upload', upload.single('file'), (req, res) => {
     if (req.cookies && req.cookies.name) {
         let ext = path.extname(req.file.filename);
-        if (ext !== '.jpeg' && ext !== 'png') {
-            return res.json({ error: true, message: "Not a JPG or HTML" });
+        if (ext !== '.jpeg' && ext !== 'png' && ext !== '.jpg') {
+            return res.json({ error: true, message: "Not a JPG, JPEG, or PNG" });
         }
         return res.json({ mediaid: req.file.filename });
     }
