@@ -165,7 +165,15 @@ app.get("/home", (req, res) => {
 
 
 app.post('/media/upload', upload.single('file'), (req, res) => {
-    console.log(req.file);
+    return res.json({ mediaid: req.file.filename });
+})
+
+app.get('/media/access/:mediaid', (req, res) => {
+    var options = {
+        root: path.join(__dirname, 'uploads')
+    };
+    let { mediaid } = req.params;
+    return res.sendFile(`${mediaid}`, options);
 })
 
 app.listen(80);
