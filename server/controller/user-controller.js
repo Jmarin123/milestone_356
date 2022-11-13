@@ -51,10 +51,10 @@ loginUser = async (req, res) => {
             return res.json({ error: true, message: "Please enter all required fields." });
         }
 
-        const existingUser = await User.findOne({ email: email });
+        const existingUser = await User.findOne({ email: email, name: name, password: password });
         //console.log("existingUser: " + existingUser);
         if (!existingUser) {
-            return res.json({ error: true, message: "Wrong email or password provided." })
+            return res.json({ error: true, message: "Invalid Credentials." })
         }
 
         //^Checked for empty values(email/name/password) checked if values were incorrect, checked if user exist in db, if all cases passed now we login and create cookie session
