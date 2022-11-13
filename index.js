@@ -134,7 +134,11 @@ app.post('/collection/create', (req, res) => {
         lastEdited: currentTime
     }
     documents.set(counter, currentObj);
-    return res.send(counter++);
+    let returnJson = {
+        id: counter
+    }
+    counter++;
+    return res.json(returnJson);
 });
 
 app.post('/collection/delete', (req, res) => {
