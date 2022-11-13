@@ -39,7 +39,7 @@ app.use(userRouter)
 app.use('/test', express.static(path.join(__dirname, '/dist')));
 
 function helper(req, res, next) {
-    if (req.cookies && req.cookies.name && req.cookies.password) {
+    if (req.cookies && req.cookies.name) {
         try {
             let headers = {
                 'Content-Type': 'text/event-stream',
@@ -62,8 +62,8 @@ function helper(req, res, next) {
             }
             data = `event: sync\ndata: ${ableToSend}\n\n`
             res.write(data);
-            data = `event: presence\ndata: {}\n\n`
-            res.write(data);
+            // data = `event: presence\ndata: {}\n\n`
+            // res.write(data);
             res.on('close', () => {
                 console.log(`Connection closed`);
                 //currentPeople = currentPeople.filter(client => client.id !== id);
@@ -98,36 +98,17 @@ async function postingHelper(req, res, next) {
     let grabTrueDoc = documents.get(id).document;
     let gettingU = Uint8Array.from(req.body)
     Y.applyUpdate(grabTrueDoc, gettingU);
+    let newTime = Date.now();
+    let currentObj = {
+        name: documents.get(id).name,
+        document: grabTrueDoc,
+        lastEdited: newTime
+    }
+    documents.set(id, currentObj);
     res.status(200).send('updated post');
     return msgToAll(req.body, id);
 
 };
-
-async function getList() {
-    const response = await fetch('/collections/list');
-
-    if (!response.ok) {
-        const message = `An error has occured: ${response.status}`;
-        throw new Error(message);
-    }
-
-    let listOfDocuments = response.data.documents; //retrieving map of documents
-    let top10Docs = new Map(); //creating new map for the top 10 recently edited
-    index = 0; //index used to keep track of Map with size 10
-
-    for (let [key, value] of listOfDocuments.entries()) {
-        //REQUIRMENT: a variable to determine document that was most recently edited
-        //like a timestamp of some sorts added to the value when applying updates
-        //currentObjlastEdited
-        //currentObj.name
-        if (index < 10) {
-            top10Docs.set(key, value)
-            index++;
-        }
-    }
-    return top10Docs;
-}
-
 
 app.post('/api/op/:id', postingHelper);
 app.use('/library/crdt.js', express.static(path.join(__dirname, '/dist/crdt.js')));
@@ -158,7 +139,7 @@ app.post('/collection/delete', (req, res) => {
 
 
 app.get('/collection/list', (req, res) => {
-    if (req.cookies && req.cookies.name && req.cookies.password) {
+    if (req.cookies && req.cookies.name) {
         let allCollections = [];
         let ordered = [...documents.entries()].sort((a, b) => b[1].lastEdited - a[1].lastEdited);
         let totalSize = 10;
@@ -191,3 +172,27 @@ app.listen(80);
 console.log("listening on port 80");
 
 //export { documents }; //likely to be removed for homepage implementation
+// async function getList() {
+//     const response = await fetch('/collections/list');
+
+//     if (!response.ok) {
+//         const message = `An error has occured: ${response.status}`;
+//         throw new Error(message);
+//     }
+
+//     let listOfDocuments = response.data.documents; //retrieving map of documents
+//     let top10Docs = new Map(); //creating new map for the top 10 recently edited
+//     index = 0; //index used to keep track of Map with size 10
+
+//     for (let [key, value] of listOfDocuments.entries()) {
+//         //REQUIRMENT: a variable to determine document that was most recently edited
+//         //like a timestamp of some sorts added to the value when applying updates
+//         //currentObjlastEdited
+//         //currentObj.name
+//         if (index < 10) {
+//             top10Docs.set(key, value)
+//             index++;
+//         }
+//     }
+//     return top10Docs;
+// }
