@@ -66,7 +66,7 @@ loginUser = async (req, res) => {
         }
         res.cookie('name', name, options);
         res.cookie('password', password, options);
-        res.json({ error: false, status: 'OK' });
+        return res.json({ name: name });
 
     } catch (err) {
         console.error(err);
