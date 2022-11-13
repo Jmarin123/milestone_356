@@ -48,6 +48,7 @@ function helper(req, res, next) {
         let { id } = req.params;
         res.writeHead(200, headers);
         let data;
+        id = parseInt(id);
         const fullState = Y.encodeStateAsUpdate(documents.get(id).document);
         const makingArray = Array.from(fullState);
         const ableToSend = JSON.stringify(makingArray);
