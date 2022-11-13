@@ -144,7 +144,7 @@ app.post('/collection/delete', (req, res) => {
 
 
 app.get('/collection/list', (req, res) => {
-    if (req.cookies && req.cookies.username && req.cookies.password) {
+    if (req.cookies && req.cookies.name && req.cookies.password) {
         let allCollections = [];
         let ordered = [...documents.entries()].sort((a, b) => b[1].time - a[1].time);
         let totalSize = 10;
