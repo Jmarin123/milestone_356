@@ -39,7 +39,7 @@ app.use(userRouter)
 app.use('/test', express.static(path.join(__dirname, '/dist')));
 
 function helper(req, res, next) {
-    if (eq.cookies && req.cookies.name && req.cookies.password) {
+    if (req.cookies && req.cookies.name && req.cookies.password) {
         try {
             let headers = {
                 'Content-Type': 'text/event-stream',
@@ -61,6 +61,8 @@ function helper(req, res, next) {
                 currentPeople.push(newClient);
             }
             data = `event: sync\ndata: ${ableToSend}\n\n`
+            res.write(data);
+            data = `event: presence\ndata: {}\n\n`
             res.write(data);
             res.on('close', () => {
                 console.log(`Connection closed`);
