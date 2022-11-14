@@ -37,7 +37,15 @@ exports.CRDT = class {
     this.ytext.delete(index, length);
   }
   insertImage(index: number, url: string) {
-    this.ytext.insert(index, " ", { image: url });
+    let delta = [{
+      retain: index
+    }, {
+      insert: {
+        image: url
+      }
+    }
+    ]
+    this.ytext.applyDelta(delta);
   }
   toHTML() {
     var QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtmlConverter;
