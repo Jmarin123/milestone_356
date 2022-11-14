@@ -210,8 +210,19 @@ app.get('/collection/list', (req, res) => {
 app.get("/home", (req, res) => {
     return res.render('index');
 })
+// const root = require('path').join(__dirname, 'public');
+// app.use(express.static(root));
 
-app.use('/edit/:id', express.static(path.join(__dirname, 'public')))
+app.use('/edit/:id', (req, res) => {
+    let { id } = req.params
+    id = parseInt(id);
+    let grabTrueDoc = documents.get(id).document;
+    let QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtmlConverter;
+    let currentDelta = grabTrueDoc.getText().toDelta();
+    let converter = new QuillDeltaToHtmlConverter(currentDelta);
+    let html = converter.convert();
+    return res.send(html);
+})
 
 
 app.post('/media/upload', upload.single('file'), (req, res) => {
@@ -241,7 +252,7 @@ app.post('/api/presence/:id', (req, res) => {
     const { id } = req.params;
     let fullCursorData = {
         session_id: Date.now(),
-        name: "testaa",
+        name: req.cookies.name,
         cursor: {
             index: index,
             length: length
