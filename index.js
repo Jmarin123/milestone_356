@@ -227,10 +227,16 @@ app.use('/edit/:id', (req, res) => {
 
 app.post('/media/upload', upload.single('file'), (req, res) => {
     if (req.cookies && req.cookies.name) {
-        let ext = path.extname(req.file.filename);
-        if (ext !== '.jpeg' && ext !== 'png' && ext !== '.jpg') {
-            return res.json({ error: true, message: "Not a JPG, JPEG, or PNG" });
+        let getMimeType = (req.file.mimetype).split('/');
+        if (getMimeType[0] !== "image") {
+            return res.json({ error: true, message: "IMAGE" })
         }
+        if (getMimeType[1] !== 'jpeg' && getMimeType[1] !== 'png') {
+            return res.json({ error: true, message: "Not a JPEG, or PNG" })
+        }
+        // if (ext !== '.jpeg' && ext !== 'png' && ext !== '.jpg') {
+        //     return res.json({ error: true, message: "Not a JPG, JPEG, or PNG" });
+        // }
         return res.json({ mediaid: req.file.filename });
     }
     return res.json({ error: true, message: "Unauthorized status code" });
