@@ -69,10 +69,13 @@ function helper(req, res, next) {
                 console.log(`Connection closed`);
                 //currentPeople = currentPeople.filter(client => client.id !== id);
             });
+            return;
         } catch (e) {
+            console.log(e);
             console.log("WTFFFF");
         }
     } else {
+        ///console.log("fail!");
         return res.json({ error: true, message: "Login before connecting" });
     }
 };
@@ -85,11 +88,11 @@ function helper(req, res, next) {
 app.get('/api/connect/:id', helper);
 
 function msgToAll(msg, id) {
-    currentPeople.forEach(person => {
-        if (person.id == id) {
-            person.res.write(`event: update\ndata: ${JSON.stringify(msg)}\n\n`);
+    for (let i = 0; i < currentPeople.length; i++) {
+        if (currentPeople[i].id == id) {
+            currentPeople[i].res.write(`event: update\ndata: ${JSON.stringify(msg)}\n\n`);
         }
-    });
+    }
 }
 
 
@@ -98,17 +101,54 @@ async function postingHelper(req, res, next) {
         let { id } = req.params
         id = parseInt(id);
         let grabTrueDoc = documents.get(id).document;
-        let gettingU = Uint8Array.from(req.body)
-        Y.applyUpdate(grabTrueDoc, gettingU);
-        let newTime = Date.now();
-        let currentObj = {
-            name: documents.get(id).name,
-            document: grabTrueDoc,
-            lastEdited: newTime
+        const { index, length, sessionID } = req.body;
+        //console.log(req.body);
+        if (sessionID) {
+            //console.log("Entered here!", req.body);
+            //console.log(currentCursors);
+            let itemToReturn
+            for (let i = 0; i < currentCursors.length; i++) {
+                //console.log(currentCursors[i]);
+                let getCurrent = JSON.parse(currentCursors[i]);
+                if (getCurrent.session_id == sessionID) {
+                    getCurrent = {
+                        session_id: getCurrent.session_id,
+                        name: getCurrent.name,
+                        cursor: {
+                            index: index,
+                            length: length
+                        }
+                    }
+                    currentCursors[i] = JSON.stringify(getCurrent);
+                    //console.log(getCurrent);
+                    itemToReturn = getCurrent;
+                    break;
+                }
+            }
+            res.status(200).send('updated post');
+            for (let i = 0; i < currentPeople.length; i++) {
+                if (currentPeople[i].id == id) {
+                    currentPeople[i].res.write(`event: presence\ndata: ${JSON.stringify(itemToReturn)}\n\n`);
+                }
+            }
+            // currentPeople.forEach(person => {
+            //     person.res.write(`event: presence\ndata: ${JSON.stringify(itemToReturn)}\n\n`);
+            // });
+            return;
+        } else {
+            let gettingU = Uint8Array.from(req.body)
+            Y.applyUpdate(grabTrueDoc, gettingU);
+            //console.log(grabTrueDoc.getText().toDelta());
+            let newTime = Date.now();
+            let currentObj = {
+                name: documents.get(id).name,
+                document: grabTrueDoc,
+                lastEdited: newTime
+            }
+            documents.set(id, currentObj);
+            res.status(200).send('updated post');
+            return msgToAll(req.body, id);
         }
-        documents.set(id, currentObj);
-        res.status(200).send('updated post');
-        return msgToAll(req.body, id);
     }
     return res.json({ error: true, message: "Unauthorized status code" });
 };
@@ -171,6 +211,8 @@ app.get("/home", (req, res) => {
     return res.render('index');
 })
 
+app.use('/edit/:id', express.static(path.join(__dirname, 'public')))
+
 
 app.post('/media/upload', upload.single('file'), (req, res) => {
     if (req.cookies && req.cookies.name) {
@@ -196,18 +238,21 @@ app.get('/media/access/:mediaid', (req, res) => {
 
 app.post('/api/presence/:id', (req, res) => {
     const { index, length } = req.body;
+    const { id } = req.params;
     let fullCursorData = {
         session_id: Date.now(),
-        name: req.cookies.name,
+        name: "testaa",
         cursor: {
             index: index,
             length: length
         }
     }
     fullCursorData = JSON.stringify(fullCursorData);
-    currentPeople.forEach(person => {
-        person.res.write(`event: presence\ndata: ${fullCursorData}\n\n`);
-    });
+    for (let i = 0; i < currentPeople.length; i++) {
+        if (currentPeople[i].id == id) {
+            currentPeople[i].res.write(`event: presence\ndata: ${fullCursorData}\n\n`);
+        }
+    }
     currentCursors.push(fullCursorData);
     return res.json(fullCursorData);
 })
