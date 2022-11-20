@@ -1,8 +1,6 @@
 const User = require('../model/users')
 const { v4: uuidv4 } = require('uuid');
 const nodemailer = require('nodemailer');
-const cookieParser = require('cookie-parser');
-app.use(cookieParser());
 registerUser = async (req, res) => {
     if (!req.body.name || !req.body.password || !req.body.email) {
         return res.json({ error: true, message: 'Please enter all required fields.' }) //Bad request if it doesnt have name, password or email
