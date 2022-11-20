@@ -67,7 +67,7 @@ function helper(req, res, next) {
             // res.write(data);
             res.on('close', () => {
                 console.log(`Connection closed`);
-                //currentPeople = currentPeople.filter(client => client.id !== id);
+                currentPeople = currentPeople.filter(client => client.id !== id);
             });
             return;
         } catch (e) {
@@ -83,15 +83,10 @@ function helper(req, res, next) {
 app.get('/api/connect/:id', helper);
 
 function msgToAll(msg, id) {
-    for (let i = 0; i < currentPeople.length; i++) {
-        if (currentPeople[i].id == id) {
-            currentPeople[i].res.write(`event: update\ndata: ${JSON.stringify(msg)}\n\n`);
-        }
-    }
+
 }
 
-
-async function postingHelper(req, res, next) {
+function postingHelper(req, res, next) {
     if (req.cookies && req.cookies.name) {
         let { id } = req.params
         id = parseInt(id);
@@ -134,13 +129,20 @@ async function postingHelper(req, res, next) {
             }
             documents.set(id, currentObj);
             res.status(200).send('updated post');
-            return msgToAll(req.body, id);
+            for (let i = 0; i < currentPeople.length; i++) {
+                if (currentPeople[i].id == id) {
+                    currentPeople[i].res.write(`event: update\ndata: ${gettingU}\n\n`);
+                }
+            }
+            return;
         }
     }
     return res.json({ error: true, message: "Unauthorized status code" });
 };
 
 app.post('/api/op/:id', postingHelper);
+
+
 app.use('/library/crdt.js', express.static(path.join(__dirname, '/dist/crdt.js')));
 
 app.post('/collection/create', (req, res) => {
@@ -166,7 +168,7 @@ app.post('/collection/create', (req, res) => {
 app.post('/collection/delete', (req, res) => {
     if (req.cookies && req.cookies.name) {
         const { id } = req.body;
-        console.log(id);
+        //console.log(id);
         documents.delete(id);
         return res.sendStatus(200);
     }
@@ -260,11 +262,11 @@ app.post('/api/presence/:id', (req, res) => {
 })
 
 app.get('/index/search', (req, res) => {
-    return res.json({});
+    //return res.json({});
 })
 
 app.get('/index/suggest', (req, res) => {
-    return res.json({});
+    //return res.json({});
 })
 
 app.listen(80);
