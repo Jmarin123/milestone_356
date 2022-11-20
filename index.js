@@ -79,11 +79,6 @@ function helper(req, res, next) {
         return res.json({ error: true, message: "Login before connecting" });
     }
 };
-// if (documents.get(id) === undefined) {
-//     let ydoc = new Y.Doc();
-//     documents.set(id, ydoc);
-//     console.log("made doc with id: " + id);
-// }
 
 app.get('/api/connect/:id', helper);
 
@@ -102,13 +97,9 @@ async function postingHelper(req, res, next) {
         id = parseInt(id);
         let grabTrueDoc = documents.get(id).document;
         const { index, length, sessionID } = req.body;
-        //console.log(req.body);
         if (sessionID) {
-            //console.log("Entered here!", req.body);
-            //console.log(currentCursors);
             let itemToReturn
             for (let i = 0; i < currentCursors.length; i++) {
-                //console.log(currentCursors[i]);
                 let getCurrent = JSON.parse(currentCursors[i]);
                 if (getCurrent.session_id == sessionID) {
                     getCurrent = {
@@ -120,7 +111,6 @@ async function postingHelper(req, res, next) {
                         }
                     }
                     currentCursors[i] = JSON.stringify(getCurrent);
-                    //console.log(getCurrent);
                     itemToReturn = getCurrent;
                     break;
                 }
@@ -131,9 +121,6 @@ async function postingHelper(req, res, next) {
                     currentPeople[i].res.write(`event: presence\ndata: ${JSON.stringify(itemToReturn)}\n\n`);
                 }
             }
-            // currentPeople.forEach(person => {
-            //     person.res.write(`event: presence\ndata: ${JSON.stringify(itemToReturn)}\n\n`);
-            // });
             return;
         } else {
             let gettingU = Uint8Array.from(req.body)
@@ -229,14 +216,12 @@ app.post('/media/upload', upload.single('file'), (req, res) => {
     if (req.cookies && req.cookies.name) {
         let getMimeType = (req.file.mimetype).split('/');
         if (getMimeType[0] !== "image") {
-            return res.json({ error: true, message: "IMAGE" })
+            return res.json({ error: true, message: "NOT AN IMAGE OR GIF" })
         }
-        if (getMimeType[1] !== 'jpeg' && getMimeType[1] !== 'png') {
+        if (getMimeType[1] !== 'jpeg' && getMimeType[1] !== 'png' && getMimeType[1] !== 'gif') {
             return res.json({ error: true, message: "Not a JPEG, or PNG" })
         }
-        // if (ext !== '.jpeg' && ext !== 'png' && ext !== '.jpg') {
-        //     return res.json({ error: true, message: "Not a JPG, JPEG, or PNG" });
-        // }
+
         return res.json({ mediaid: req.file.filename });
     }
     return res.json({ error: true, message: "Unauthorized status code" });
@@ -272,6 +257,14 @@ app.post('/api/presence/:id', (req, res) => {
     }
     currentCursors.push(fullCursorData);
     return res.json(fullCursorData);
+})
+
+app.get('/index/search', (req, res) => {
+    return res.json({});
+})
+
+app.get('/index/suggest', (req, res) => {
+    return res.json({});
 })
 
 app.listen(80);
