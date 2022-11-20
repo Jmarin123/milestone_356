@@ -1,7 +1,8 @@
 const User = require('../model/users')
 const { v4: uuidv4 } = require('uuid');
 const nodemailer = require('nodemailer');
-
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 registerUser = async (req, res) => {
     if (!req.body.name || !req.body.password || !req.body.email) {
         return res.json({ error: true, message: 'Please enter all required fields.' }) //Bad request if it doesnt have name, password or email
@@ -46,12 +47,12 @@ registerUser = async (req, res) => {
 
 loginUser = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { email, password } = req.body;
         if (!email || !password) {
             return res.json({ error: true, message: "Please enter all required fields." });
         }
 
-        const existingUser = await User.findOne({ email: email, name: name, password: password });
+        const existingUser = await User.findOne({ email: email, password: password });
         //console.log("existingUser: " + existingUser);
         if (!existingUser) {
             return res.json({ error: true, message: "Invalid Credentials." })
@@ -64,9 +65,9 @@ loginUser = async (req, res) => {
         if (existingUser.isVerified == false) {
             return res.json({ error: true, message: "User needs to verify account first." });
         }
-        res.cookie('name', name, options);
+        res.cookie('name', existingUser.name, options);
         res.cookie('password', password, options);
-        return res.json({ name: name });
+        return res.json({ name: existingUser.name });
 
     } catch (err) {
         console.error(err);
